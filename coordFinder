@@ -68,6 +68,8 @@ int main()
             {
                 cout << "\n\n\n";
                 system("pause");
+                gotoxy(0,6);
+                cout << "                                                          ";
             }
             break;
         case rect:
@@ -161,11 +163,13 @@ void tutorial(int mode)
     case raw:
         gotoxy(0,15);
         cout << "Tutorial: Press TAB for change mode or press SPACE for a temporary lock on values ( can be unlocked by pressing any button )";
+        cout << "\n\nPress ESC to exit.";
         break;
     case rect:
         gotoxy(0,15);
         cout << "Tutorial: Press TAB for change mode or press SPACE for get the TOP LEFT coords of an abstract rectangle, then press SPACE";
         cout << " again\nfor get the BOTTOM RIGHT coords of an abstract rectangle";
+        cout << "\n\nPress ESC to exit.";
         break;
     }
 }
@@ -204,6 +208,6 @@ void ShowConsoleCursor(bool showFlag)
     CONSOLE_CURSOR_INFO     cursorInfo;
 
     GetConsoleCursorInfo(out, &cursorInfo);
-    cursorInfo.bVisible = showFlag; 
+    cursorInfo.bVisible = showFlag;
     SetConsoleCursorInfo(out, &cursorInfo);
 }
