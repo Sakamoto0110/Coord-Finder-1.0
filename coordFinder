@@ -1,0 +1,209 @@
+#include <iostream>
+#include <windows.h>
+#include <stdio.h>
+#include <string.h>
+#include <conio.h>
+
+using namespace std;
+
+//Mode controller and info
+enum mode{ raw, rect }mode;
+const int maxMode = 1;
+int actualMode = 0;
+
+
+//Struct for coords of a rectangle
+struct screen
+{
+    struct coord
+    {
+        int x;
+        int y;
+    }coord;
+};
+screen topLeft;
+screen topRight;
+screen bottomLeft;
+screen bottomRight;
+
+POINT coord;            // Cursor coord buffer
+
+
+
+
+void gotoxy(int x, int y);
+void ShowConsoleCursor(bool showFlag);
+void changeMode();
+void tutorial(int mode);
+void printCoord();
+
+int main()
+{
+    bool isRunning = true;          // Main loop controller
+    int keyD;                       // Input buffer
+    ShowConsoleCursor(false);
+    while(isRunning)
+    {
+        switch(mode)
+        {
+        case raw:
+            while(not(kbhit()))
+            {
+                tutorial((int)raw);
+                gotoxy(0,0);
+                cout << "Mode: Raw";
+                GetCursorPos(&coord);
+                gotoxy(0,2);
+                cout << "Cursor posX:      ";
+                gotoxy(13,2);
+                cout << coord.x;
+                gotoxy(0,3);
+                cout << "Cursor posY:      ";
+                gotoxy(13,3);
+                cout << coord.y;
+                Sleep(100);
+            }
+            keyD = getch();
+            if ( (keyD != VK_TAB) && (keyD == VK_SPACE) )
+            {
+                cout << "\n\n\n";
+                system("pause");
+            }
+            break;
+        case rect:
+            while(not(kbhit()))
+            {
+                tutorial((int)rect);
+                GetCursorPos(&coord);
+                gotoxy(0,0);
+                cout << "Mode: Rect";
+                gotoxy(0,2);
+                cout << "                    ";
+                gotoxy(0,2);
+                cout << "Waiting first point" << endl;
+                gotoxy(0,3);
+                cout << "             ";
+                gotoxy(0,3);
+                cout << '(' << coord.x << ',' << coord.y << ')' << endl;
+                Sleep(100);
+            }
+            keyD = getch();
+            if ( (keyD != VK_TAB) && (keyD == VK_SPACE) )
+            {
+                GetCursorPos(&coord);
+                topLeft.coord.x = coord.x;
+                topLeft.coord.y = coord.y;
+            }
+            while( (not(kbhit())) && (keyD != VK_TAB) )
+            {
+                GetCursorPos(&coord);
+                gotoxy(0,0);
+                cout << "Mode: Rect";
+                gotoxy(0,2);
+                cout << "                    ";
+                gotoxy(0,2);
+                cout << "Waiting second point" << endl;
+                gotoxy(0,3);
+                cout << "             ";
+                gotoxy(0,3);
+                cout << '(' << coord.x << ',' << coord.y << ')' << endl;
+                Sleep(100);
+            }
+            if( keyD != VK_TAB )
+            {
+                keyD = getch();
+            }
+            if ( (keyD != VK_TAB) && (keyD == VK_SPACE) )
+            {
+                GetCursorPos(&coord);
+                bottomRight.coord.x = coord.x;
+                bottomRight.coord.y = coord.y;
+                bottomLeft.coord.x = topLeft.coord.x;
+                bottomLeft.coord.y = bottomRight.coord.y;
+                topRight.coord.x = bottomRight.coord.x;
+                topRight.coord.y = topLeft.coord.y;
+                printCoord();
+            }
+            break;
+        }
+        fflush(stdin);
+        switch(keyD)
+        {
+        case VK_TAB:
+            changeMode();
+            break;
+        case VK_ESCAPE:
+            isRunning = false;
+            exit(1);
+            break;
+        }
+        //system("cls");
+    }
+    return 0;
+}
+
+void printCoord()
+{
+    cout << '\n';
+    cout << '(' << topLeft.coord.x << ',' << topLeft.coord.y << ')';
+    cout << '(' << topRight.coord.x << ',' << topRight.coord.y << ')' << endl;
+    cout << '(' << bottomLeft.coord.x << ',' << bottomLeft.coord.y << ')';
+    cout << '(' << bottomRight.coord.x << ',' << bottomRight.coord.y << ')' << endl;
+    cout << '\n';
+    system("pause");
+    gotoxy(0,8);
+    cout << "                                                          ";
+}
+void tutorial(int mode)
+{
+    switch(mode)
+    {
+    case raw:
+        gotoxy(0,15);
+        cout << "Tutorial: Press TAB for change mode or press SPACE for a temporary lock on values ( can be unlocked by pressing any button )";
+        break;
+    case rect:
+        gotoxy(0,15);
+        cout << "Tutorial: Press TAB for change mode or press SPACE for get the TOP LEFT coords of an abstract rectangle, then press SPACE";
+        cout << " again\nfor get the BOTTOM RIGHT coords of an abstract rectangle";
+        break;
+    }
+}
+void changeMode()
+{
+    if(actualMode < maxMode)
+    {
+        actualMode++;
+    }else
+    {
+        actualMode = 0;
+    }
+    switch(actualMode)
+    {
+    case 0:
+        system("cls");
+        mode = raw;
+        break;
+    case 1:
+        system("cls");
+        mode = rect;
+        break;
+    }
+}
+void gotoxy(int x, int y)
+{
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+void ShowConsoleCursor(bool showFlag)
+{
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_CURSOR_INFO     cursorInfo;
+
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = showFlag; 
+    SetConsoleCursorInfo(out, &cursorInfo);
+}
